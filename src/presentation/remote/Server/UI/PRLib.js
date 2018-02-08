@@ -1,0 +1,5 @@
+/*
+ * testJs
+ */
+
+alert("hello!");
