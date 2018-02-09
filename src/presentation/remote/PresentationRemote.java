@@ -27,7 +27,6 @@ public class PresentationRemote {
     
     private int port = 8888;
     
-    
     /**
      * @param args the command line arguments
      */
@@ -48,14 +47,17 @@ public class PresentationRemote {
         try {
             CommandLine cmd = parser.parse(options, args);
             
+            if(cmd.hasOption("h")){
+                this.showHelpMenu();
+                return;
+            }
+            
             if(cmd.hasOption("p"))
                 this.port = Integer.valueOf(cmd.getOptionValue("p"));
             
             RemoteServer server = new RemoteServer(port);
             
-        } catch (ParseException ex) {
-            Logger.getLogger(PresentationRemote.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
+        } catch (ParseException | IOException ex) {
             Logger.getLogger(PresentationRemote.class.getName()).log(Level.SEVERE, null, ex);
         }
     }

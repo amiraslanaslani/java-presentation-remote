@@ -49,6 +49,23 @@ public class RemoteServer {
         private static final KeysRobot keysRobot = new KeysRobot();
         private static final VolumeRobot volumeRobot = new VolumeRobot();
 
+        private final String screenImageFormat;
+        private final int width,height;
+        
+        public Router(){
+            this(
+                    Capture.IMAGE_FORMAT_GIF,
+                    700,
+                    -1
+            );
+        }
+        
+        public Router(String format,int width, int height){
+            this.screenImageFormat = format;
+            this.width = width;
+            this.height = height;
+        }
+
         @Override
         public void handle(HttpExchange ex) throws IOException {
             try {
@@ -56,7 +73,6 @@ public class RemoteServer {
                 String contentType = "text/html";
                 int responseStatus = HttpURLConnection.HTTP_OK,
                     responseLength = 0;
-                System.out.println(ex.getRequestURI().getRawPath());
                 String file;
                 
                 String loadedPath = ex.getRequestURI().getRawPath();
@@ -67,10 +83,10 @@ public class RemoteServer {
                         response = file.getBytes();
                         break;
                     case "/screen": // Show screen stream
-                        Capture capture = new Capture(700, -1);
-                        response = capture.getBytes(Capture.IMAGE_FORMAT_GIF).toByteArray();
+                        Capture capture = new Capture(this.width, this.height);
+                        response = capture.getBytes(screenImageFormat).toByteArray();
                         responseLength = response.length;
-                        contentType = "image/gif";
+                        contentType = "image/" + screenImageFormat;
                         break;
                     case "/prlib.js": // Show PRLib.js
                         file = getFileStringInUIDirectory("PRLib.js");
