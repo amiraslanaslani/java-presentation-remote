@@ -42,7 +42,7 @@ public class RemoteServer {
         server.createContext("/", new Router());
         
         server.start();
-        System.out.println("Server is running...");
+        System.out.println("Server is running on port " + this.port + "...");
     }
     
     static class Router implements HttpHandler{
@@ -55,7 +55,7 @@ public class RemoteServer {
         public Router(){
             this(
                     Capture.IMAGE_FORMAT_GIF,
-                    700,
+                    280,
                     -1
             );
         }
@@ -81,6 +81,12 @@ public class RemoteServer {
                         file = getFileStringInUIDirectory("Main.html");
                         responseLength = file.length();
                         response = file.getBytes();
+                        break;
+                    case "/screen/base64": // Show screen stream
+                        Capture capturebase = new Capture(this.width, this.height);
+                        String base64 = capturebase.getBase64(screenImageFormat);
+                        response = base64.getBytes();
+                        responseLength = base64.length();
                         break;
                     case "/screen": // Show screen stream
                         Capture capture = new Capture(this.width, this.height);
