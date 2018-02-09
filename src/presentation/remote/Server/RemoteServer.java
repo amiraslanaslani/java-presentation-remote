@@ -11,18 +11,17 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 import com.sun.net.httpserver.HttpHandler;
+import java.awt.AWTException;
 import java.io.File;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
+import screenshot.capture.Capture;
 
 /**
  *
@@ -30,8 +29,10 @@ import org.apache.commons.io.FileUtils;
  */
 public class RemoteServer {
     private final int port;
+    
     public RemoteServer(int port) throws IOException{
         this.port = port;
+        
         HttpServer server = HttpServer.create(new InetSocketAddress(this.port), 0);
         server.setExecutor(Executors.newCachedThreadPool());
         
@@ -42,38 +43,50 @@ public class RemoteServer {
     }
     
     static class Router implements HttpHandler{
+        private static final KeysRobot keysRobot = new KeysRobot();
 
         @Override
         public void handle(HttpExchange ex) throws IOException {
             try {
                 
-                String response = "",
-                        contentType = "text/html";
-                int responseStatus = HttpURLConnection.HTTP_OK;
+                byte[] response = ("").getBytes();
+                String contentType = "text/html";
+                int responseStatus = HttpURLConnection.HTTP_OK,
+                    responseLength = 0;
                 System.out.println(ex.getRequestURI().getRawPath());
+                String file;
                 
-                
-                switch(ex.getRequestURI().getRawPath()){
+                String loadedPath = ex.getRequestURI().getRawPath();
+                switch(loadedPath){
                     case "/": // Show Main Page
-                        response = getFileStringInUIDirectory("Main.html");
+                        file = getFileStringInUIDirectory("Main.html");
+                        responseLength = file.length();
+                        response = file.getBytes();
                         break;
                     case "/screen": // Show screen stream
-
+                        Capture capture = new Capture(700, -1);
+                        response = capture.getBytes(Capture.IMAGE_FORMAT_GIF).toByteArray();
+                        responseLength = response.length;
+                        contentType = "image/gif";
                         break;
                     case "/prlib.js": // Show PRLib.js
-                        response = getFileStringInUIDirectory("PRLib.js");
+                        file = getFileStringInUIDirectory("PRLib.js");
+                        responseLength = file.length();
+                        response = file.getBytes();
                         contentType = "application/javascript";
                         break;
                     default:
-
+                        if(! keysRobot.checkKey(loadedPath)){ // Check to key send
+                            responseStatus = HttpURLConnection.HTTP_NOT_FOUND;
+                        }
                 }
                 
                 ex.getResponseHeaders().put("Content-Type", Arrays.asList(contentType));
-                ex.sendResponseHeaders(200, response.length());
+                ex.sendResponseHeaders(responseStatus, responseLength);
                 OutputStream os = ex.getResponseBody();
-                os.write(response.getBytes());
+                os.write(response);
                 os.close();
-            } catch (URISyntaxException ex1) {
+            } catch (URISyntaxException | AWTException ex1) {
                 Logger.getLogger(RemoteServer.class.getName()).log(Level.SEVERE, null, ex1);
             }
         }
