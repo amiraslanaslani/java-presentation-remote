@@ -5,7 +5,17 @@
  */
 package presentation.remote.Server;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -63,25 +73,60 @@ public class VolumeRobot {
     }
     
     private class WindowsVolumeController implements VolumeController{
+        
+        private void copyNircmd() throws FileNotFoundException, IOException{
+            InputStream is = getClass().getResource("/presentation/remote/Server/Executables/nircmdc.exe").openStream();
+            OutputStream os = new FileOutputStream("nircmdc.exe");
 
+            byte[] b = new byte[2048];
+            int length;
+
+            while ((length = is.read(b)) != -1) {
+                os.write(b, 0, length);
+            }
+
+            is.close();
+            os.close();
+        }
+        
         @Override
         public void mute() {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            try {
+                copyNircmd();
+                Runtime.getRuntime().exec("nircmdc.exe mutesysvolume 1");
+            } catch (IOException ex) {
+                Logger.getLogger(VolumeRobot.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
 
         @Override
         public void unmute() {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            try {
+                copyNircmd();
+                Runtime.getRuntime().exec("nircmdc.exe mutesysvolume 0");
+            } catch (IOException ex) {
+                Logger.getLogger(VolumeRobot.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
 
         @Override
-        public void vollumeIncrease() {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        public void volumeIncrease() {
+            try {
+                copyNircmd();
+                Runtime.getRuntime().exec("nircmdc.exe changesysvolume 6553");
+            } catch (IOException ex) {
+                Logger.getLogger(VolumeRobot.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
 
         @Override
-        public void vollumeDecrease() {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        public void volumeDecrease() {
+            try {
+                copyNircmd();
+                Runtime.getRuntime().exec("nircmdc.exe changesysvolume -6553");
+            } catch (IOException ex) {
+                Logger.getLogger(VolumeRobot.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
 
     }
@@ -107,7 +152,7 @@ public class VolumeRobot {
         }
 
         @Override
-        public void vollumeIncrease() {
+        public void volumeIncrease() {
             try {
                 Runtime.getRuntime().exec("amixer -D pulse sset Master 10%+");
             } catch (IOException ex) {
@@ -116,7 +161,7 @@ public class VolumeRobot {
         }
 
         @Override
-        public void vollumeDecrease() {
+        public void volumeDecrease() {
             try {
                 Runtime.getRuntime().exec("amixer -D pulse sset Master 10%-");
             } catch (IOException ex) {
@@ -147,7 +192,7 @@ public class VolumeRobot {
         }
 
         @Override
-        public void vollumeIncrease() {
+        public void volumeIncrease() {
             try {
                 Runtime.getRuntime().exec("osascript -e 'set volume output volume ((output volume of (get volume settings)) + 10)'");
             } catch (IOException ex) {
@@ -156,7 +201,7 @@ public class VolumeRobot {
         }
 
         @Override
-        public void vollumeDecrease() {
+        public void volumeDecrease() {
             try {
                 Runtime.getRuntime().exec("osascript -e 'set volume output volume ((output volume of (get volume settings)) - 10)'");
             } catch (IOException ex) {
@@ -179,12 +224,12 @@ public class VolumeRobot {
         }
 
         @Override
-        public void vollumeIncrease() {
+        public void volumeIncrease() {
             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
 
         @Override
-        public void vollumeDecrease() {
+        public void volumeDecrease() {
             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
 

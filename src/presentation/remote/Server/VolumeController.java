@@ -12,6 +12,6 @@ package presentation.remote.Server;
 public interface VolumeController {
     public void mute();
     public void unmute();
-    public void vollumeIncrease();
-    public void vollumeDecrease();
+    public void volumeIncrease();
+    public void volumeDecrease();
 }

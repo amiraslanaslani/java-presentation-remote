@@ -32,7 +32,10 @@ public class RemoteServer {
     
     public RemoteServer(int port) throws IOException{
         this.port = port;
-        
+        this.run();
+    }
+    
+    private void run() throws IOException{
         HttpServer server = HttpServer.create(new InetSocketAddress(this.port), 0);
         server.setExecutor(Executors.newCachedThreadPool());
         
@@ -44,11 +47,11 @@ public class RemoteServer {
     
     static class Router implements HttpHandler{
         private static final KeysRobot keysRobot = new KeysRobot();
+        private static final VolumeRobot volumeRobot = new VolumeRobot();
 
         @Override
         public void handle(HttpExchange ex) throws IOException {
             try {
-                
                 byte[] response = ("").getBytes();
                 String contentType = "text/html";
                 int responseStatus = HttpURLConnection.HTTP_OK,
@@ -74,6 +77,18 @@ public class RemoteServer {
                         responseLength = file.length();
                         response = file.getBytes();
                         contentType = "application/javascript";
+                        break;
+                    case "/mute":
+                        volumeRobot.getVolumeController().mute();
+                        break;
+                    case "/unmute":
+                        volumeRobot.getVolumeController().unmute();
+                        break;
+                    case "/volup":
+                        volumeRobot.getVolumeController().volumeIncrease();
+                        break;
+                    case "/voldown":
+                        volumeRobot.getVolumeController().volumeDecrease();
                         break;
                     default:
                         if(! keysRobot.checkKey(loadedPath)){ // Check to key send
