@@ -35,9 +35,6 @@ public class VolumeRobot {
         } else if (OSValidator.isUnix()) {
             this.controller = new UnixVolumeController();
         } else {
-//        if (OSValidator.isSolaris()) {
-//            this.controller = new SolarisVolumeController();
-//        } else {
             this.controller = new FakeVolumeController();
             isVolumeControllSupported = false;
             System.out.println("Your OS is not support vollume controll!!");

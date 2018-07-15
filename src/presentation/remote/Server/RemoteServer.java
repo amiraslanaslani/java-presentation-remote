@@ -15,8 +15,13 @@ import java.awt.AWTException;
 import java.io.File;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.Charsets;
@@ -42,7 +47,34 @@ public class RemoteServer {
         server.createContext("/", new Router());
         
         server.start();
-        System.out.println("Server is running on port " + this.port + "...");
+        
+        System.out.println("IP list of my system:");
+        for(String ip : getIPsList()){
+            if(ip.contains("%")){
+                ip = ip.split("%")[0];
+            }
+            System.out.println("\t" + ip);
+        }
+        
+        System.out.println("\nServer is running on port " + this.port + " . . .");
+    }
+    
+    private ArrayList<String> getIPsList() throws SocketException{
+        ArrayList<String> ips = new ArrayList<>();
+
+        Enumeration e = NetworkInterface.getNetworkInterfaces();
+        while(e.hasMoreElements())
+        {
+            NetworkInterface n = (NetworkInterface) e.nextElement();
+            Enumeration ee = n.getInetAddresses();
+            while (ee.hasMoreElements())
+            {
+                InetAddress i = (InetAddress) ee.nextElement();
+                ips.add(i.getHostAddress());
+            }
+        }
+
+        return ips;
     }
     
     static class Router implements HttpHandler{
